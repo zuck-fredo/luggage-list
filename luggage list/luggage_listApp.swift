@@ -12,7 +12,8 @@ import SwiftData
 struct luggage_listApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
-            Item.self,
+            Trip.self,
+            PackingItem.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 
