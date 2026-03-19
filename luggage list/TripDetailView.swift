@@ -81,7 +81,7 @@ struct TripDetailView: View {
             }
         }
         .sheet(isPresented: $showingAddItem) {
-            AddItemView(trip: trip)
+            AddTripItemView(trip: trip)
         }
         .task {
             await TripNotificationManager.shared.scheduleReminders(for: trip)
@@ -103,35 +103,11 @@ struct TripDetailView: View {
     }
 }
 
-// MARK: - Packing Item Row
+// PackingItemRow is shared from ContentView.swift
 
-struct PackingItemRow: View {
-    @Bindable var item: PackingItem
+// MARK: - Add Trip Item View
 
-    var body: some View {
-        HStack {
-            Button {
-                withAnimation(.spring(duration: 0.3)) {
-                    item.isPacked.toggle()
-                }
-            } label: {
-                Image(systemName: item.isPacked ? "checkmark.circle.fill" : "circle")
-                    .font(.title2)
-                    .foregroundStyle(item.isPacked ? .green : .secondary)
-            }
-            .buttonStyle(.plain)
-
-            Text(item.name)
-                .strikethrough(item.isPacked, color: .secondary)
-                .foregroundStyle(item.isPacked ? .secondary : .primary)
-                .animation(.default, value: item.isPacked)
-        }
-    }
-}
-
-// MARK: - Add Item View
-
-struct AddItemView: View {
+struct AddTripItemView: View {
     let trip: Trip
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
