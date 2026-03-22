@@ -37,8 +37,26 @@ Users can create trips, add packing items organized by category, and track their
 
 The app uses SwiftData for persistence with the following models:
 
+### `PackingList` (Item.swift)
+A reusable packing list containing items organized by category.
+
+**Properties:**
+- `name: String` — List name (e.g., "Weekend Trip Essentials", "Winter Vacation")
+- `createdDate: Date` — When the list was created
+- `items: [PackingItem]` — Items in this list with cascade delete relationship
+
+**Computed Properties:**
+- `packedCount: Int` — Number of items marked as packed
+- `progress: Double` — Packing completion (0.0 to 1.0)
+
+**Relationships:**
+- One-to-many with `PackingItem` (inverse: `\PackingItem.packingList`)
+- Delete rule: `.cascade` (deleting a list deletes all its items)
+
+---
+
 ### `Trip` (Item.swift)
-The main entity representing a planned trip.
+A planned trip with destination, date, and trip-specific packing items.
 
 **Properties:**
 - `name: String` — Trip name (e.g., "Summer Holiday")
@@ -57,13 +75,16 @@ The main entity representing a planned trip.
 ---
 
 ### `PackingItem` (Item.swift)
-Individual items to pack for a trip.
+Individual items that can belong to either a packing list or a trip.
 
 **Properties:**
 - `name: String` — Item name (e.g., "Passport", "Sunglasses")
 - `category: PackingCategory` — Item category (enum)
 - `isPacked: Bool` — Whether the item is packed (default: false)
-- `trip: Trip?` — Optional back-reference to parent trip
+- `trip: Trip?` — Optional reference to parent trip
+- `packingList: PackingList?` — Optional reference to parent packing list
+
+**Note:** An item belongs to either a trip OR a packing list, not both.
 
 ---
 
@@ -86,9 +107,9 @@ Enum categorizing packing items.
 
 ---
 
-### Legacy Model
+### No Legacy Models
 
-**`Item` (Item.swift)** — Original template model with timestamp. **Not used in the app.** This is leftover from the Xcode project template and should be removed.
+All models are actively used in the app. The original Xcode template model has been removed.
 
 ---
 
@@ -101,7 +122,7 @@ Pre-defined item lists for common trip types (Item.swift):
 - **🏙️ City Break** — Jeans, t-shirts, comfortable shoes, etc.
 - **🥾 Hiking** — Hiking boots, rain jacket, first aid kit, etc.
 
-Templates are used when creating a new trip to quickly populate items.
+Templates are used when creating a new trip to quickly populate trip items.
 
 ---
 
@@ -112,16 +133,19 @@ Templates are used when creating a new trip to quickly populate items.
 ```
 ContentView (ContentView.swift) — "Packing & Travel" Home Screen
   │
-  ├─ HomeCardView → NavigationLink to PackingListView
-  │    └─ PackingListView (ContentView.swift)
-  │         ├─ Grouped by PackingCategory
-  │         ├─ PackingItemRow (inline component)
-  │         └─ AddItemView (sheet for adding new items)
+  ├─ HomeCardView (blue) → NavigationLink to PackingListView
+  │    └─ PackingListView (PackingListView.swift)
+  │         ├─ List of PackingList objects
+  │         ├─ Floating + button (bottom center, blue circle)
+  │         └─ PackingListDetailView (PackingListView.swift) [NavigationLink]
+  │              ├─ Grouped by PackingCategory
+  │              ├─ PackingListItemRow (inline component)
+  │              └─ AddItemToPackingListView (sheet for adding items)
   │
-  └─ HomeCardView → NavigationLink to TripListView
+  └─ HomeCardView (purple) → NavigationLink to TripListView
        └─ TripListView (TripListView.swift)
             ├─ TripDetailView (TripDetailView.swift) [NavigationLink]
-            │    ├─ PackingItemRow (inline)
+            │    ├─ TripItemRow (inline)
             │    └─ AddItemView (sheet)
             └─ AddTripView (AddTripView.swift) [sheet]
 ```
@@ -144,15 +168,41 @@ Reusable card component for the home screen with:
 - Colored background with subtle border
 - Tap to navigate
 
-#### **PackingListView** (ContentView.swift)
-General packing list interface with categories, search, and item management.
+#### **PackingListView** (PackingListView.swift)
+Shows list of all packing lists with floating add button.
 
 **Features:**
-- Groups items by `PackingCategory` (clothing, toiletries, electronics, etc.)
-- Searchable list
-- Packing progress counter ("\(packed) of \(total) packed")
-- "Unpack All" button to reset all items
-- Add new items via sheet
+- SwiftData `@Query` sorted by creation date (newest first)
+- Empty state: "No lists created yet, tap + to create a new list!"
+- List showing all packing lists with progress bars
+- **Floating + button** (blue circle, bottom center, white plus icon, shadow)
+- Swipe-to-delete packing lists
+- Sheet to create new packing list
+
+**Components:**
+- `PackingListRow` — Displays list name, item count, progress bar
+- `AddPackingListView` — Sheet for creating new packing list
+
+---
+
+#### **PackingListDetailView** (PackingListView.swift)
+Detail screen for a single packing list showing all items.
+
+**Features:**
+- `@Bindable var packingList: PackingList` for two-way data binding
+- Items grouped by category
+- Searchable with `.searchable()` modifier
+- Empty state when no items
+- Swipe-to-delete items
+- "Unpack All" button in bottom toolbar
+- Sheet to add new item
+- Top navigation bar + button to add items
+
+**Components:**
+- `PackingListItemRow` — Checkbox-style row with toggle animation
+- `AddItemToPackingListView` — Form to add new item to packing list
+
+---
 
 #### **TripListView** (TripListView.swift)
 Main screen showing all trips.
@@ -183,7 +233,9 @@ Detail screen for a single trip showing all packing items.
 - Sheet to add new item
 - Automatically schedules notifications on appear (`.task`)
 
-**Note:** TripDetailView has its own inline implementations of item management views.
+**Components:**
+- `TripItemRow` — Checkbox-style row with toggle animation for trip items
+- `AddTripItemView` — Form to add new item to trip
 
 ---
 
@@ -199,41 +251,13 @@ Sheet for creating a new trip.
 
 ---
 
-#### **PackingItemRow** (ContentView.swift)
-Individual packing item row with interactive checkbox used in PackingListView.
-
-**Features:**
-- Checkbox toggle with spring animation
-- Green checkmark when packed, gray circle when unpacked
-- Strikethrough text when packed
-- Button-style interaction
-
-**Note:** Similar component exists inline in TripDetailView for trip-specific items.
-
----
-
-#### **AddItemView** (ContentView.swift)
-Form for adding new packing items to the general packing list.
-Sheet for adding items to a trip.
-
-**Properties:**
-- `let trip: Trip` — The trip to add the item to
-- `@State private var name: String`
-- `@State private var category: PackingCategory`
-
-**Features:**
-- Text field for item name
-- Picker for category
-- Cancel/Add buttons
-- Validation (name cannot be empty)
-
 ---
 
 ## Notification System
 
 **TripNotificationManager** (TripNotificationManager.swift)
 
-Singleton actor-isolated class managing departure reminders.
+Singleton actor-isolated class managing departure reminders for trips only (not packing lists).
 
 ### Features
 - Requests user authorization
@@ -253,16 +277,29 @@ Singleton actor-isolated class managing departure reminders.
 ## File Organization
 
 ### Data Models
-- **Item.swift** — `Trip`, `PackingItem`, `PackingCategory`, `PackingTemplate` (main models)
+- **Item.swift** — `PackingList`, `Trip`, `PackingItem`, `PackingCategory`, `PackingTemplate`
 
 ### Views
-- **ContentView.swift** — Root view (simple packing list interface)
-- **TripListView.swift** — List of all trips
-- **TripDetailView.swift** — Detail view for a trip + AddItemView
-- **AddTripView.swift** — Sheet for creating trips
+
+**Home Screen:**
+- **ContentView.swift** — Home screen with two navigation cards
+
+**Packing Lists:**
+- **PackingListView.swift** — All packing list views:
+  - `PackingListView` — List of all packing lists
+  - `PackingListRow` — Row for each packing list
+  - `AddPackingListView` — Sheet for creating new packing list
+  - `PackingListDetailView` — Detail view for a packing list
+  - `PackingListItemRow` — Row for items in a packing list
+  - `AddItemToPackingListView` — Sheet for adding items to packing list
+
+**Trips:**
+- **TripListView.swift** — List of all trips, `TripRow`, `PackingProgressView`
+- **TripDetailView.swift** — Detail view for a trip, `TripItemRow`, `AddTripItemView`
+- **AddTripView.swift** — Sheet for creating trips with templates
 
 ### Services
-- **TripNotificationManager.swift** — Notification scheduling
+- **TripNotificationManager.swift** — Notification scheduling for trips
 
 ### App
 - **packing_listApp.swift** — App entry point with SwiftData container
@@ -274,28 +311,36 @@ Singleton actor-isolated class managing departure reminders.
 
 ---
 
-## Known Issues
+## Code Organization
 
-### Code Organization Problems
+### File Structure
 
-1. **Clean File Structure**
-   - Model files consolidated into `Item.swift`
-   - View files use standard naming without version numbers
+✅ **Clean and Organized**
+- Model files consolidated into `Item.swift`
+- View files separated by feature (home, packing lists, trips)
+- No duplicate code or version numbers in filenames
+- Clear naming conventions (TripItemRow vs PackingListItemRow)
 
-2. **Code Organization**
-   - `PackingItemRow` is defined in `ContentView.swift`
-   - `AddItemView` is defined in `ContentView.swift`
-   - All components properly separated and non-duplicated
+### Component Organization
 
-3. **Import Statements**
-   - All files properly import `SwiftData` where needed
-   - No missing dependency issues
+**Home Screen (ContentView.swift):**
+- `ContentView` — Main home screen
+- `HomeCardView` — Reusable navigation card component
+
+**Packing Lists (PackingListView.swift):**
+- All packing list related views in one file
+- Clear separation from trip functionality
+
+**Trips (TripListView.swift, TripDetailView.swift, AddTripView.swift):**
+- Trip views separated across multiple files
+- Each file has focused responsibility
 
 ### Best Practices Maintained
 
 **Clean file structure:**
-- `Item.swift` contains all data models (Trip, PackingItem, PackingCategory, PackingTemplate)
-- `ContentView.swift` provides the main packing list interface with supporting views
+- `Item.swift` contains all data models (PackingList, Trip, PackingItem, PackingCategory, PackingTemplate)
+- `ContentView.swift` provides the home screen only
+- `PackingListView.swift` handles all packing list functionality
 - `TripListView.swift`, `TripDetailView.swift`, `AddTripView.swift` handle trip management
 - No duplicate code or ambiguous declarations
 
@@ -320,16 +365,19 @@ Singleton actor-isolated class managing departure reminders.
 - Date calculations (days until departure)
 
 **Integration Tests:**
-- Creating trips with templates
-- Adding/removing items
+- Creating packing lists and trips
+- Creating packing lists with templates
+- Adding/removing items to packing lists and trips
 - Marking items as packed/unpacked
-- SwiftData persistence
+- SwiftData persistence for both models
 
 **UI Tests:**
+- Packing list creation flow
 - Trip creation flow
-- Item addition flow
+- Item addition flow (both packing lists and trips)
 - Search functionality
 - Swipe-to-delete
+- Floating button interaction
 
 ---
 
@@ -338,7 +386,11 @@ Singleton actor-isolated class managing departure reminders.
 ### SwiftData Schema
 Defined in `packing_listApp.swift`:
 ```swift
-Schema([Trip.self, PackingItem.self])
+Schema([
+    Trip.self, 
+    PackingItem.self,
+    PackingList.self
+])
 ```
 
 ### Model Configuration
@@ -349,12 +401,26 @@ Schema([Trip.self, PackingItem.self])
 
 ## User Flows
 
+### Creating a Packing List
+1. From home screen, tap "Packing Lists" card
+2. Tap floating blue + button at bottom center
+3. Enter list name
+4. Tap "Create"
+5. New list appears in the list
+
+### Adding Items to a Packing List
+1. Tap on a packing list
+2. Tap "+" button in navigation bar
+3. Enter item name and select category
+4. Tap "Add"
+
 ### Creating a Trip
-1. Tap "+" in TripListView
-2. Enter trip name (required), destination (optional), date
-3. Enable/disable reminders
-4. Choose template or start empty
-5. Tap "Create"
+1. From home screen, tap "Trip Planning Lists" card
+2. Tap "+" in navigation bar
+3. Enter trip name (required), destination (optional), date
+4. Enable/disable reminders
+5. Choose template or start empty
+6. Tap "Create"
 
 ### Adding Items to a Trip
 1. Open trip in TripDetailView
@@ -362,10 +428,11 @@ Schema([Trip.self, PackingItem.self])
 3. Enter item name and select category
 4. Tap "Add"
 
-### Packing Items
-1. In TripDetailView, tap the circle icon next to an item
-2. Item toggles between packed (green checkmark) and unpacked (gray circle)
-3. Progress bar updates automatically
+### Managing Packing Lists
+- **View all lists:** PackingListView shows all lists sorted by creation date (newest first)
+- **Delete list:** Swipe left on a list
+- **View list details:** Tap on list row
+- **Unpack all items:** Tap "Unpack All" in PackingListDetailView bottom toolbar
 
 ### Managing Trips
 - **View all trips:** TripListView shows all trips sorted by departure date
@@ -377,16 +444,18 @@ Schema([Trip.self, PackingItem.self])
 
 ## Future Enhancements (Ideas)
 
+- [ ] Packing list editing (rename lists)
 - [ ] Trip editing (change name, destination, date)
 - [ ] Item editing (change name, category)
 - [ ] Bulk item operations (mark category as packed)
 - [ ] Custom templates (save frequently used item lists)
-- [ ] Sharing packing lists
+- [ ] Share packing lists with others
+- [ ] Copy items from packing list to trip
 - [ ] Quantity per item (e.g., "3 t-shirts")
 - [ ] Photo attachments for items
 - [ ] Checklist import/export
 - [ ] Trip history and statistics
-- [ ] Widget showing upcoming trips
+- [ ] Widget showing upcoming trips and packing progress
 - [ ] iPad/Mac support with multi-column layout
 
 ---
