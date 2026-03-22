@@ -1,6 +1,6 @@
 //
 //  TripListView.swift
-//  luggage list
+//  packing list
 //
 
 import SwiftUI

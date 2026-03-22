@@ -30,6 +30,27 @@ enum PackingCategory: String, CaseIterable, Codable {
     }
 }
 
+// MARK: - Packing List
+
+@Model
+final class PackingList {
+    var name: String
+    var createdDate: Date
+    @Relationship(deleteRule: .cascade, inverse: \PackingItem.packingList)
+    var items: [PackingItem]
+    
+    var packedCount: Int { items.filter(\.isPacked).count }
+    var progress: Double {
+        items.isEmpty ? 0 : Double(packedCount) / Double(items.count)
+    }
+    
+    init(name: String, createdDate: Date = .now) {
+        self.name = name
+        self.createdDate = createdDate
+        self.items = []
+    }
+}
+
 // MARK: - Packing Item
 
 @Model
@@ -38,6 +59,7 @@ final class PackingItem {
     var category: PackingCategory
     var isPacked: Bool
     var trip: Trip?
+    var packingList: PackingList?
 
     init(name: String, category: PackingCategory = .other, isPacked: Bool = false) {
         self.name = name

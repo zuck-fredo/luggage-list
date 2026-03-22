@@ -1,13 +1,13 @@
 //
-//  luggage_listUITestsLaunchTests.swift
-//  luggage listUITests
+//  packing_listUITestsLaunchTests.swift
+//  packing listUITests
 //
 //  Created by Francesco Zucchetta on 11/02/26.
 //
 
 import XCTest
 
-final class luggage_listUITestsLaunchTests: XCTestCase {
+final class packing_listUITestsLaunchTests: XCTestCase {
 
     override class var runsForEachTargetApplicationUIConfiguration: Bool {
         true

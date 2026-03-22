@@ -1,6 +1,6 @@
-# Luggage List 🧳
+# Packing & Travel 🧳✈️
 
-A modern iOS app to organize packing for trips. Create trips, add items organized by category, and track your packing progress with smart reminders.
+A modern iOS app to organize packing and trip planning. The app features a home screen with two main sections: general packing lists organized by category, and trip-specific planning with destinations, dates, and smart reminders.
 
 ![Platform](https://img.shields.io/badge/platform-iOS-lightgrey)
 ![Swift](https://img.shields.io/badge/Swift-6.0-orange)
@@ -9,12 +9,14 @@ A modern iOS app to organize packing for trips. Create trips, add items organize
 
 ## Features
 
-✅ **Trip Management** — Organize packing lists by trip with destinations and departure dates  
+✅ **Home Screen** — Card-based navigation to Packing Lists and Trip Planning sections  
+✅ **General Packing Lists** — Manage reusable packing items organized by category  
+✅ **Trip Management** — Organize trip-specific packing lists with destinations and departure dates  
 ✅ **Category Organization** — Items grouped by clothing, toiletries, electronics, documents, accessories  
 ✅ **Packing Templates** — Quick-start with pre-built lists (Beach, Business, City Break, Hiking)  
 ✅ **Progress Tracking** — Visual progress bars show packing completion  
 ✅ **Smart Reminders** — Get notified the evening before and morning of departure  
-✅ **Search** — Quickly find items in your packing list  
+✅ **Search** — Quickly find items in your packing lists  
 ✅ **Clean Design** — Native SwiftUI with SF Symbols and smooth animations
 
 ## Screenshots
@@ -61,30 +63,43 @@ enum PackingCategory {
 ## Installation
 
 1. Clone this repository
-2. Open `luggage list.xcodeproj` in Xcode
+2. Open `packing list.xcodeproj` in Xcode
 3. Build and run on simulator or device
 
 ```bash
-git clone https://github.com/YOUR_USERNAME/luggage-list.git
-cd luggage-list
-open "luggage list.xcodeproj"
+git clone https://github.com/YOUR_USERNAME/packing-list.git
+cd packing-list
+open "packing list.xcodeproj"
 ```
 
 ## Usage
 
-### Creating a Trip
-1. Tap the **+** button
-2. Enter trip name, destination, and departure date
-3. Choose a packing template or start with an empty list
-4. Enable reminders (optional)
+### Home Screen
+The app opens to a "Packing & Travel" home screen with two cards:
+- **Packing Lists** — Manage general packing items (reusable across trips)
+- **Trip Planning Lists** — Create and manage trip-specific planning
 
-### Adding Items
-1. Open a trip
-2. Tap **+** to add items
+### Managing Packing Lists
+1. Tap the **Packing Lists** card on the home screen
+2. Tap **+** to add items to your general packing list
+3. Enter item name and select category
+4. Tap checkmark to mark items as packed
+5. Use "Unpack All" to reset all items
+
+### Creating a Trip
+1. Tap the **Trip Planning Lists** card on the home screen
+2. Tap the **+** button
+3. Enter trip name, destination, and departure date
+4. Choose a packing template or start with an empty list
+5. Enable reminders (optional)
+
+### Managing Trip Items
+1. Open a trip from the Trip Planning Lists
+2. Tap **+** to add items specific to this trip
 3. Enter item name and select category
 4. Tap checkmark to mark items as packed
 
-### Managing Packing
+### General Tips
 - ✅ Tap the circle icon to toggle packed status
 - 🔍 Use search to find specific items
 - 🗑️ Swipe left to delete items or trips
@@ -93,29 +108,29 @@ open "luggage list.xcodeproj"
 ## Project Structure
 
 ```
-luggage list/
+packing list/
 ├── Models/
-│   ├── Item 3.swift          # Trip, PackingItem, PackingCategory models
+│   ├── Item.swift                # Trip, PackingItem, PackingCategory models
 │   └── TripNotificationManager.swift
 ├── Views/
-│   ├── ContentView 3.swift   # Root view
-│   ├── TripListView.swift    # List of all trips
-│   ├── TripDetailView.swift  # Trip detail with items
-│   └── AddTripView.swift     # New trip form
+│   ├── ContentView.swift         # Root view with packing list
+│   ├── TripListView.swift        # List of all trips
+│   ├── TripDetailView.swift      # Trip detail with items
+│   └── AddTripView.swift         # New trip form
 ├── App/
-│   └── luggage_listApp.swift
+│   └── packing_listApp.swift
 └── Tests/
-    └── luggage_listTests.swift
+    └── packing_listTests.swift
 ```
 
-## Known Issues
+## Status
 
-⚠️ **Work in Progress** — The project currently has duplicate model files causing compilation errors. These will be cleaned up soon:
-- Multiple `Item.swift` files
-- Multiple `ContentView.swift` files
-- Duplicate view declarations
+✅ **Project Structure** — Code has been cleaned up and organized:
+- Model files consolidated in `Item.swift`
+- Views properly separated and named
+- Test files updated with new naming
 
-See `claude.md` for full documentation and cleanup plan.
+See `claude.md` for full documentation.
 
 ## Roadmap
 

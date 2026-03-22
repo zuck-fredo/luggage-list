@@ -1,6 +1,6 @@
 //
-//  luggage_listApp.swift
-//  luggage list
+//  packing_listApp.swift
+//  packing list
 //
 //  Created by Francesco Zucchetta on 11/02/26.
 //
@@ -9,11 +9,12 @@ import SwiftUI
 import SwiftData
 
 @main
-struct luggage_listApp: App {
+struct packing_listApp: App {
     var sharedModelContainer: ModelContainer = {
         let schema = Schema([
             Trip.self,
             PackingItem.self,
+            PackingList.self,
         ])
         let modelConfiguration = ModelConfiguration(schema: schema, isStoredInMemoryOnly: false)
 

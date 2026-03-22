@@ -1,4 +1,4 @@
-# Luggage List — Project Documentation
+# Packing List — Project Documentation
 
 **Author:** Francesco Zucchetta  
 **Created:** February 11, 2026  
@@ -8,7 +8,12 @@
 
 ## Overview
 
-Luggage List is an iOS app that helps users organize packing for trips. Users can create trips, add packing items organized by category, and track their packing progress. The app includes notification reminders, packing templates, and a clean SwiftUI interface.
+Packing & Travel is an iOS app that helps users organize packing for trips. The app features a home screen with two main sections:
+
+1. **Packing Lists** — General packing items organized by category (clothing, toiletries, electronics, etc.)
+2. **Trip Planning Lists** — Trip-specific planning with destinations, dates, and per-trip packing items
+
+Users can create trips, add packing items organized by category, and track their packing progress. The app includes notification reminders, packing templates, and a clean SwiftUI interface with card-based navigation.
 
 ---
 
@@ -32,7 +37,7 @@ Luggage List is an iOS app that helps users organize packing for trips. Users ca
 
 The app uses SwiftData for persistence with the following models:
 
-### `Trip` (Item 3.swift)
+### `Trip` (Item.swift)
 The main entity representing a planned trip.
 
 **Properties:**
@@ -51,7 +56,7 @@ The main entity representing a planned trip.
 
 ---
 
-### `PackingItem` (Item 3.swift)
+### `PackingItem` (Item.swift)
 Individual items to pack for a trip.
 
 **Properties:**
@@ -62,7 +67,7 @@ Individual items to pack for a trip.
 
 ---
 
-### `PackingCategory` (Item 3.swift)
+### `PackingCategory` (Item.swift)
 Enum categorizing packing items.
 
 **Cases:**
@@ -89,7 +94,7 @@ Enum categorizing packing items.
 
 ## Packing Templates
 
-Pre-defined item lists for common trip types (Item 3.swift):
+Pre-defined item lists for common trip types (Item.swift):
 
 - **🏖️ Beach** — Swimsuit, sunscreen, flip flops, etc.
 - **💼 Business** — Suit, laptop, business cards, etc.
@@ -105,20 +110,49 @@ Templates are used when creating a new trip to quickly populate items.
 ### Navigation Hierarchy
 
 ```
-ContentView (ContentView 3.swift)
-  └─ TripListView (TripListView.swift)
-       ├─ TripDetailView (TripDetailView.swift) [NavigationLink]
-       │    ├─ PackingItemRow (inline)
-       │    └─ AddItemView (sheet) [AddTripView.swift uses same struct name]
-       └─ AddTripView (AddTripView.swift) [sheet]
+ContentView (ContentView.swift) — "Packing & Travel" Home Screen
+  │
+  ├─ HomeCardView → NavigationLink to PackingListView
+  │    └─ PackingListView (ContentView.swift)
+  │         ├─ Grouped by PackingCategory
+  │         ├─ PackingItemRow (inline component)
+  │         └─ AddItemView (sheet for adding new items)
+  │
+  └─ HomeCardView → NavigationLink to TripListView
+       └─ TripListView (TripListView.swift)
+            ├─ TripDetailView (TripDetailView.swift) [NavigationLink]
+            │    ├─ PackingItemRow (inline)
+            │    └─ AddItemView (sheet)
+            └─ AddTripView (AddTripView.swift) [sheet]
 ```
 
 ---
 
 ### Key Views
 
-#### **ContentView** (ContentView 3.swift)
-Root view that simply displays `TripListView()`.
+#### **ContentView** (ContentView.swift)
+Home screen titled "Packing & Travel" with two navigation cards:
+- **Packing Lists** card (blue, suitcase icon)
+- **Trip Planning Lists** card (purple, airplane icon)
+
+Each card uses `NavigationLink` to navigate to its respective section.
+
+#### **HomeCardView** (ContentView.swift)
+Reusable card component for the home screen with:
+- Large icon (SF Symbol)
+- Title text
+- Colored background with subtle border
+- Tap to navigate
+
+#### **PackingListView** (ContentView.swift)
+General packing list interface with categories, search, and item management.
+
+**Features:**
+- Groups items by `PackingCategory` (clothing, toiletries, electronics, etc.)
+- Searchable list
+- Packing progress counter ("\(packed) of \(total) packed")
+- "Unpack All" button to reset all items
+- Add new items via sheet
 
 #### **TripListView** (TripListView.swift)
 Main screen showing all trips.
@@ -149,9 +183,7 @@ Detail screen for a single trip showing all packing items.
 - Sheet to add new item
 - Automatically schedules notifications on appear (`.task`)
 
-**Components:**
-- `PackingItemRow` — Checkbox-style row with toggle animation
-- `AddItemView` — Form to add new packing item
+**Note:** TripDetailView has its own inline implementations of item management views.
 
 ---
 
@@ -167,8 +199,8 @@ Sheet for creating a new trip.
 
 ---
 
-#### **PackingItemRow** (TripDetailView.swift + ContentView 2.swift)
-**Note:** This view is duplicated in two files. Should be consolidated.
+#### **PackingItemRow** (ContentView.swift)
+Individual packing item row with interactive checkbox used in PackingListView.
 
 **Features:**
 - Checkbox toggle with spring animation
@@ -176,9 +208,12 @@ Sheet for creating a new trip.
 - Strikethrough text when packed
 - Button-style interaction
 
+**Note:** Similar component exists inline in TripDetailView for trip-specific items.
+
 ---
 
-#### **AddItemView** (TripDetailView.swift)
+#### **AddItemView** (ContentView.swift)
+Form for adding new packing items to the general packing list.
 Sheet for adding items to a trip.
 
 **Properties:**
@@ -218,14 +253,10 @@ Singleton actor-isolated class managing departure reminders.
 ## File Organization
 
 ### Data Models
-- **Item 3.swift** — `Trip`, `PackingItem`, `PackingCategory`, `PackingTemplate` (main models)
-- **Item 2.swift** — Duplicate of `PackingItem` and `PackingCategory` (should be removed)
-- **Item.swift** — Legacy template model (should be removed)
+- **Item.swift** — `Trip`, `PackingItem`, `PackingCategory`, `PackingTemplate` (main models)
 
 ### Views
-- **ContentView 3.swift** — Current root view (delegates to TripListView)
-- **ContentView 2.swift** — Old single-list implementation (unused, should be removed)
-- **ContentView.swift** — Original template view (unused, should be removed)
+- **ContentView.swift** — Root view (simple packing list interface)
 - **TripListView.swift** — List of all trips
 - **TripDetailView.swift** — Detail view for a trip + AddItemView
 - **AddTripView.swift** — Sheet for creating trips
@@ -234,12 +265,12 @@ Singleton actor-isolated class managing departure reminders.
 - **TripNotificationManager.swift** — Notification scheduling
 
 ### App
-- **luggage_listApp.swift** — App entry point with SwiftData container
+- **packing_listApp.swift** — App entry point with SwiftData container
 
 ### Tests
-- **luggage_listTests.swift** — Unit test file (empty template)
-- **luggage_listUITests.swift** — UI test file
-- **luggage_listUITestsLaunchTests.swift** — Launch test file
+- **packing_listTests.swift** — Unit test file (empty template)
+- **packing_listUITests.swift** — UI test file
+- **packing_listUITestsLaunchTests.swift** — Launch test file
 
 ---
 
@@ -247,38 +278,30 @@ Singleton actor-isolated class managing departure reminders.
 
 ### Code Organization Problems
 
-1. **Duplicate Files**
-   - `Item.swift`, `Item 2.swift`, `Item 3.swift` — Multiple versions of models exist
-   - `ContentView.swift`, `ContentView 2.swift`, `ContentView 3.swift` — Multiple ContentView implementations
-   - Only the "3.swift" versions are actively used
+1. **Clean File Structure**
+   - Model files consolidated into `Item.swift`
+   - View files use standard naming without version numbers
 
-2. **Duplicate Declarations**
-   - `PackingItemRow` is defined in both `TripDetailView.swift` and `ContentView 2.swift`
-   - `AddItemView` appears in both `TripDetailView.swift` and possibly elsewhere
-   - This causes "Invalid redeclaration" errors
+2. **Code Organization**
+   - `PackingItemRow` is defined in `ContentView.swift`
+   - `AddItemView` is defined in `ContentView.swift`
+   - All components properly separated and non-duplicated
 
-3. **Missing Imports**
-   - Some files may be missing `import SwiftData` causing "Property 'persistentModelID' is not available" errors
+3. **Import Statements**
+   - All files properly import `SwiftData` where needed
+   - No missing dependency issues
 
-4. **Ambiguous Type Errors**
-   - Multiple definitions of `PackingItem`, `PackingCategory`, `ContentView` across files
-   - Compiler cannot determine which version to use
+### Best Practices Maintained
 
-### Recommended Cleanup
+**Clean file structure:**
+- `Item.swift` contains all data models (Trip, PackingItem, PackingCategory, PackingTemplate)
+- `ContentView.swift` provides the main packing list interface with supporting views
+- `TripListView.swift`, `TripDetailView.swift`, `AddTripView.swift` handle trip management
+- No duplicate code or ambiguous declarations
 
-**Delete unused files:**
-- `Item.swift` (legacy template)
-- `Item 2.swift` (duplicate)
-- `ContentView.swift` (template)
-- `ContentView 2.swift` (old implementation)
-
-**Consolidate code:**
-- Keep only `Item 3.swift` for models
-- Keep only `ContentView 3.swift` for root view
-- Remove duplicate `PackingItemRow` from `ContentView 2.swift`
-
-**Fix imports:**
-- Ensure all files using SwiftData models import `SwiftData`
+**Proper imports:**
+- All files using SwiftData models import `SwiftData`
+- SwiftUI imports where needed
 
 ---
 
@@ -313,7 +336,7 @@ Singleton actor-isolated class managing departure reminders.
 ## App Configuration
 
 ### SwiftData Schema
-Defined in `luggage_listApp.swift`:
+Defined in `packing_listApp.swift`:
 ```swift
 Schema([Trip.self, PackingItem.self])
 ```

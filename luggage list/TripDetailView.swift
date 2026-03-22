@@ -1,6 +1,6 @@
 //
 //  TripDetailView.swift
-//  luggage list
+//  packing list
 //
 
 import SwiftUI
@@ -39,7 +39,7 @@ struct TripDetailView: View {
                     ForEach(groupedItems, id: \.0) { category, categoryItems in
                         Section {
                             ForEach(categoryItems) { item in
-                                PackingItemRow(item: item)
+                                TripItemRow(item: item)
                             }
                             .onDelete { offsets in
                                 deleteItems(categoryItems, offsets: offsets)
@@ -103,7 +103,31 @@ struct TripDetailView: View {
     }
 }
 
-// PackingItemRow is shared from ContentView.swift
+// MARK: - Trip Item Row
+
+struct TripItemRow: View {
+    @Bindable var item: PackingItem
+
+    var body: some View {
+        HStack {
+            Button {
+                withAnimation(.spring(duration: 0.3)) {
+                    item.isPacked.toggle()
+                }
+            } label: {
+                Image(systemName: item.isPacked ? "checkmark.circle.fill" : "circle")
+                    .font(.title2)
+                    .foregroundStyle(item.isPacked ? .green : .secondary)
+            }
+            .buttonStyle(.plain)
+
+            Text(item.name)
+                .strikethrough(item.isPacked, color: .secondary)
+                .foregroundStyle(item.isPacked ? .secondary : .primary)
+                .animation(.default, value: item.isPacked)
+        }
+    }
+}
 
 // MARK: - Add Trip Item View
 

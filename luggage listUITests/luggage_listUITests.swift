@@ -1,13 +1,13 @@
 //
-//  luggage_listUITests.swift
-//  luggage listUITests
+//  packing_listUITests.swift
+//  packing listUITests
 //
 //  Created by Francesco Zucchetta on 11/02/26.
 //
 
 import XCTest
 
-final class luggage_listUITests: XCTestCase {
+final class packing_listUITests: XCTestCase {
 
     override func setUpWithError() throws {
         // Put setup code here. This method is called before the invocation of each test method in the class.

@@ -1,9 +1,10 @@
 //
 //  TripNotificationManager.swift
-//  luggage list
+//  packing list
 //
 
 import Foundation
+import SwiftData
 import UserNotifications
 
 @MainActor
